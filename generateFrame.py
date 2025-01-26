@@ -5,6 +5,7 @@ import urllib.request
 import datetime
 from PIL import Image
 import os
+import time as t
 
 time = datetime.datetime.now().strftime("%I:%M%p%B%d%Y")
 pp_name = "/home/pjd/inkplate/pp/"+time+".gif"
@@ -17,20 +18,16 @@ gifToPngOut = "/home/pjd/inkplate/pp/"+time+".png"
 image.save(gifToPngOut)
 os.remove(pp_name)
 
-image = cv.imread(gifToPngOut,0)
+image = cv.imread(gifToPngOut,cv.IMREAD_GRAYSCALE)
 os.remove(gifToPngOut)
 
-proc = "/home/pjd/inkplate/proc/"+time+".png"
+proc = "/home/pjd/inkplate/proc/"+time+".bmp"
 image = image[30:520, 0:600]
-shades=8
-gray_levels=256//shades
-image=(image // gray_levels) * gray_levels
-
 cv.imwrite(proc,image)
 
-for fname in os.listdir("/home/pjd/inkplate/pp/"):
-	fpath = os.path.join("/home/pjd/inkplate/pp/",fname)
+for fname in os.listdir("/home/pjd/inkplate/proc/"):
+	fpath = os.path.join("/home/pjd/inkplate/proc/",fname)
 	if os.path.isfile(fpath):
-		file_age = time.time() - os.path.getmtime(file_path)
+		file_age = t.time() - os.path.getmtime(fpath)
 		if file_age > 3600:
-			os.remove(file_path)
+			os.remove(fpath)

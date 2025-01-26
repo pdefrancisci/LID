@@ -14,7 +14,7 @@ class ImageRequestHandler(http.server.SimpleHTTPRequestHandler):
 		if new_image:
 			#serve!
 			self.send_response(200)
-			self.send_header('Content-type','image/png')
+			self.send_header('Content-type','image/bmp')
 			self.end_headers()
 			with open(new_image,'rb') as file:
 				self.wfile.write(file.read())
@@ -25,7 +25,7 @@ class ImageRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 def get_newest_image(folder):
 	#search for images
-	image_files=glob.glob(os.path.join(folder,'*.png'))
+	image_files=glob.glob(os.path.join(folder,'*.bmp'))
 	if not image_files:
 		print('ahhh!')
 		return None
