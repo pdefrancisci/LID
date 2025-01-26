@@ -10,7 +10,7 @@ class Record(object):
     def __init__(self, j):
         self.__dict__ = json.loads(j)
 
-def get_records():
+def get_record():
     ser = serial.Serial('/dev/ttyACM0',9600, timeout=1.0)
     time.sleep(3)
     ser.reset_input_buffer();
@@ -23,6 +23,7 @@ def get_records():
                 if line[0] == '{':
                     rec = Record(line)
                     pprint(vars(rec))
+                    return line
 
     except KeyboardInterrupt:
         print("Close Serial")
@@ -31,6 +32,6 @@ def get_records():
 ###############################################################
 
 if __name__ == '__main__':
-    get_records()
+    get_record()
     #config = load_config()
     #print(config)
