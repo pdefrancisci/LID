@@ -27,3 +27,10 @@ gray_levels=256//shades
 image=(image // gray_levels) * gray_levels
 
 cv.imwrite(proc,image)
+
+for fname in os.listdir("/home/pjd/inkplate/pp/"):
+	fpath = os.path.join("/home/pjd/inkplate/pp/",fname)
+	if os.path.isfile(fpath):
+		file_age = time.time() - os.path.getmtime(file_path)
+		if file_age > 3600:
+			os.remove(file_path)
