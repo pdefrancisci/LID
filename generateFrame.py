@@ -19,10 +19,14 @@ image.save(gifToPngOut)
 os.remove(pp_name)
 
 image = cv.imread(gifToPngOut,cv.IMREAD_GRAYSCALE)
+#1 bit conversion
+#_, image = cv.threshold(image, 128, 255, cv.THRESH_BINARY)
 os.remove(gifToPngOut)
 
 proc = "/home/pjd/inkplate/proc/"+time+".bmp"
 image = image[30:520, 0:600]
+#pretty sure this should be a 7 bit greyscale reduction
+image = (image // 32) * 32
 cv.imwrite(proc,image)
 
 for fname in os.listdir("/home/pjd/inkplate/proc/"):
