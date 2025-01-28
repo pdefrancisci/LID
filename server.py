@@ -7,9 +7,12 @@ import os
 import glob
 from listener import get_record
 from pprint import pprint
+from PIL import Image
+import glob
 
 # Define the folder containing images
 IMAGE_FOLDER = '/home/pjd/inkplate/proc'
+DITH_FOLDER = '/home/pjd/inkplate/dith/'
 PORT = 8008
 
 SERIAL_PORT = '/dev/ttyACM0'  # Adjust as needed
@@ -40,6 +43,25 @@ def check_sensors():
             }
         return jsonify(response),404
     
+@app.route('/dither/radar')
+def dradarradar():
+	image_paths = sorted(glob.glob(DITH_FOLDER + "*.bmp"))
+	images=[]
+	for ip in image_paths:
+		images.append(Image.open(ip))
+	images[0].save(
+		DITH_FOLDER+"../dradar.gif",
+		save_all=True,
+		append_images=images[1:],
+		duration=500,
+		loop=0
+	)
+	return send_file(DITH_FOLDER+"../dradar.gif", mimetype='image/gif') 
+
+@app.route('/dither/radarImage')
+def dradarImage():
+	image = get_newest_image(DITH_FOLDER)
+	return send_file(image, mimetype='image/bmp')
     
 # The route() function of the Flask class is a decorator, 
 # which tells the application which URL should call 
@@ -62,4 +84,4 @@ def get_newest_image(folder):
 if __name__ == '__main__':
     # run() method of Flask class runs the application 
     # on the local development server.
-    app.run()
+    app.run(host='0.0.0.0', port=8008)
