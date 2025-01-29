@@ -16,7 +16,6 @@ image = Image.open(pp_name)
 
 gifToPngOut = "/home/pjd/LID/pp/"+time+".png"
 image.save(gifToPngOut)
-os.remove(pp_name)
 
 image = cv.imread(gifToPngOut,cv.IMREAD_GRAYSCALE)
 #1 bit conversion

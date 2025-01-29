@@ -11,8 +11,8 @@ from PIL import Image
 import glob
 
 # Define the folder containing images
-IMAGE_FOLDER = '/home/pjd/inkplate/proc'
-DITH_FOLDER = '/home/pjd/inkplate/dith/'
+IMAGE_FOLDER = '/home/pjd/LID/proc'
+DITH_FOLDER = '/home/pjd/LID/dith/'
 PORT = 8008
 
 SERIAL_PORT = '/dev/ttyACM0'  # Adjust as needed
@@ -45,23 +45,27 @@ def check_sensors():
     
 @app.route('/dither/radar')
 def dradarradar():
-	image_paths = sorted(glob.glob(DITH_FOLDER + "*.bmp"))
-	images=[]
-	for ip in image_paths:
-		images.append(Image.open(ip))
-	images[0].save(
-		DITH_FOLDER+"../dradar.gif",
-		save_all=True,
-		append_images=images[1:],
-		duration=500,
-		loop=0
-	)
-	return send_file(DITH_FOLDER+"../dradar.gif", mimetype='image/gif') 
+    image_paths = sorted(glob.glob(DITH_FOLDER + "*.bmp"))
+    images=[]
+    for ip in image_paths:
+        image=Image.open(ip)
+        if image:
+            image=image.convert('P')
+            images.append(image)
+    print(images)
+    images[0].save(
+        DITH_FOLDER+"../dradar.gif",
+        save_all=True,
+        append_images=images[1:],
+        duration=500,
+        loop=0
+    )
+    return send_file(DITH_FOLDER+"../dradar.gif", mimetype='image/gif') 
 
 @app.route('/dither/radarImage')
 def dradarImage():
-	image = get_newest_image(DITH_FOLDER)
-	return send_file(image, mimetype='image/bmp')
+    image = get_newest_image(DITH_FOLDER)
+    return send_file(image, mimetype='image/bmp')
     
 # The route() function of the Flask class is a decorator, 
 # which tells the application which URL should call 

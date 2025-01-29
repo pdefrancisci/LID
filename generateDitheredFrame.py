@@ -18,7 +18,6 @@ urllib.request.urlretrieve("https://radar.weather.gov/ridge/standard/KBUF_0.gif"
 image = Image.open(pp_name)
 gifToPngOut = "/home/pjd/LID/pp/"+time+".png"
 image.save(gifToPngOut)
-os.remove(pp_name)
 
 #convert to 8 bit greyscale
 image = image.convert("L")
@@ -58,4 +57,12 @@ for fname in os.listdir("/home/pjd/LID/dith/"):
     if os.path.isfile(fpath):
         file_age = t.time() - os.path.getmtime(fpath)
         if file_age > 3600:
+            os.remove(fpath)
+
+#we need to clean up the old images as well
+for fname in os.listdir("/home/pjd/LID/pp/"):
+    fpath = os.path.join("/home/pjd/LID/pp/",fname)
+    if os.path.isfile(fpath):
+        file_age = t.time() - os.path.getmtime(fpath)
+        if file_age > 60:
             os.remove(fpath)
