@@ -12,11 +12,11 @@ BOT_CROP=30
 
 #python imaging libraries don't like .gif, just get it into memory
 time = datetime.datetime.now().strftime("%I:%M%p%B%d%Y")
-pp_name = "/home/pjd/inkplate/pp/"+time+".gif"
+pp_name = "/home/pjd/LID/pp/"+time+".gif"
 urllib.request.urlretrieve("https://radar.weather.gov/ridge/standard/KBUF_0.gif",
     pp_name)
 image = Image.open(pp_name)
-gifToPngOut = "/home/pjd/inkplate/pp/"+time+".png"
+gifToPngOut = "/home/pjd/LID/pp/"+time+".png"
 image.save(gifToPngOut)
 os.remove(pp_name)
 
@@ -33,7 +33,7 @@ image = image.convert("L")
 #3: THe lightest part of the storm, but also the great lakes haha
 #4:The lightest part of the map, this was 0, but I set it to 50 to make the outline stronger  
 #so now storms, rather than being a big grey mess, storms still *usually* show outlines!
-bayer=np.array([[110, 150], [225, 50]])
+bayer=np.array([[100, 140], [225, 50]])
 
 #so, apply fs dithering, then show it
 #crop 
@@ -50,11 +50,11 @@ bayer_tile=bayer_tile[:w,:h]
 image=(image>bayer_tile).astype(np.uint8)*255
 image=Image.fromarray(image)
 image=image.convert("1")
-image.save("/home/pjd/inkplate/dith/"+time+".bmp")
+image.save("/home/pjd/LID/dith/"+time+".bmp")
 
 #we need to clean up the old images as well
-for fname in os.listdir("/home/pjd/inkplate/dith/"):
-    fpath = os.path.join("/home/pjd/inkplate/dith/",fname)
+for fname in os.listdir("/home/pjd/LID/dith/"):
+    fpath = os.path.join("/home/pjd/LID/dith/",fname)
     if os.path.isfile(fpath):
         file_age = t.time() - os.path.getmtime(fpath)
         if file_age > 3600:
