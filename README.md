@@ -32,7 +32,9 @@ pdefrancisci57@gmail.com
 https://www.linkedin.com/in/pdefrancisci57/
 
 <h2>Known Issues</h2>
-The refresh rate isn't very fast, but it's about what I expect for a weather radar, which doesn't race by. The dithering process I used used a 2x2 Bayer Matrix, this taught me a lot about how the different threshold impact the image, and I spent significant time tweaking my matrix. However, I'm not completely satisfied with the resulting image. I expect I could use a larger matrix to convey more detail, while still producing a monochrome bitmap with good performance. In particular the names of cities are pretty hard to read, after the matrix chews up compression artifacts near the text.
+The refresh rate isn't very fast, but it's about what I expect for a weather radar, which doesn't race by. The dithering process I used used a 2x2 Bayer Matrix, this taught me a lot about how the different threshold impact the image, and I spent significant time tweaking my matrix. However, I'm not completely satisfied with the resulting image. I expect I could use a larger matrix to convey more detail, while still producing a monochrome bitmap with good performance. In particular the names of cities are pretty hard to read, after the matrix chews up compression artifacts near the text. Here's a rough sketch of the full design:
+<img src="https://github.com/user-attachments/assets/d996062f-c86e-4fca-adf8-d04c19a9fcd1">
+
 
 
 <h2>Future plans and updates</h2>
