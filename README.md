@@ -1,4 +1,5 @@
 <h1>Life Improvement Device</h1>
+<h2><a href="https://www.youtube.com/embed/oOnCfNCNFV8?si=gfAQq7jsOvnHzt7z">Click here to see it in action!</a></h2>
 
 <h2>Description</h2>
 The life improvement device, currently, is an e-paper project. It is Soldered's Inkplate 6, which acts as a frontend for NWS radar images preprocessed by a raspberry pi. Most of the work thus far has involved finding tricks to overcome the limitations of e-ink displays. So I will get into that next.
@@ -12,13 +13,17 @@ My goal in this project was to produce a home assistant, which is a common use c
 To avoid this full refresh, I used a feature offered by some e-paper displays, known as partial refresh. You see, when only part of the screen has changed, it is unnecessary to update the entire display, and it takes time to do so. Thus, if you only update a subset of the display, you get faster, more subtle updates.
 
 <h2>Dithering</h2>
-I also previously alluded to the fact the Inkplate 6 supports only black and white. This includes a 3 bit greyscale. I opted to not use the greyscale, as a 1 bit monochrome bitmap would be more performant, and keep in mind, we're trying to smoothly imitate motion on an e-paper display. However, converting from 256/256/256 rgb in a .gif, straight to a bitmap was a non starter. Here is a frame of the NWS Buffalo weather radar, which I'll be using:
-![image](https://github.com/user-attachments/assets/d13f6323-0eb5-4a88-8b55-f6e606de3f86)
-Here is that image converted to mono bmp, using a naiive threshold:
-![image](https://github.com/user-attachments/assets/4275440c-57d0-4071-9e4f-315f1e7fca45)
-This would load fast, with the one drawback that it looks terrible.
+<p>I also previously alluded to the fact the Inkplate 6 supports only black and white. This includes a 3 bit greyscale. I opted to not use the greyscale, as a 1 bit monochrome bitmap would be more performant, and keep in mind, we're trying to smoothly imitate motion on an e-paper display. However, converting from 256/256/256 rgb in a .gif, straight to a bitmap was a non starter. Here is a frame of the NWS Buffalo weather radar, which I'll be using:</p>
 
-Thankfully, the problem of giving the illusion of multiple colors, in an environment where there are few, is solved with a family of algorithms that do "dithering". Dithering describes the process of interweaving pixels, so that the pattern of weaved pixels gives the impression of a mix of the two colors. This process is commonly used in older computer games, as well as by comic books and cheap printers. I opted to use what's called a Bayer Matrix, which is used as a threshold map to produce ordered dithering. Essentially, rather than picking one threshold and applying it everywhere, you have a threshold matrix which is applied pixel by pixel. I chose to use a Bayer Matrix because the algorithm is fast, simple to implement, and *copes well with motion*. Algorithms such as Floyd Steinberg produce artifacts when movement takes place.
+<img src="https://github.com/user-attachments/assets/d13f6323-0eb5-4a88-8b55-f6e606de3f86">
+
+<p>Here is that image converted to mono bmp, using a naiive threshold:</p>
+
+<img src="https://github.com/user-attachments/assets/4275440c-57d0-4071-9e4f-315f1e7fca45">
+
+<p>This would load fast, with the one drawback that it looks terrible.</p>
+
+<p>Thankfully, the problem of giving the illusion of multiple colors, in an environment where there are few, is solved with a family of algorithms that do "dithering". Dithering describes the process of interweaving pixels, so that the pattern of weaved pixels gives the impression of a mix of the two colors. This process is commonly used in older computer games, as well as by comic books and cheap printers. I opted to use what's called a Bayer Matrix, which is used as a threshold map to produce ordered dithering. Essentially, rather than picking one threshold and applying it everywhere, you have a threshold matrix which is applied pixel by pixel. I chose to use a Bayer Matrix because the algorithm is fast, simple to implement, and *copes well with motion*. Algorithms such as Floyd Steinberg produce artifacts when movement takes place.</p>
 
 With the image reduced to a dithered monochrome bitmap, the Inkplate 6 can render the images, with a high refresh rate, but not an unbroken sense of continuity, as lengthy pixel inversion would require. Overall, I consider the project a success, and I'm just waiting for a case for the Inkplate to arrive now.
 
