@@ -30,6 +30,5 @@ https://www.linkedin.com/in/pdefrancisci57/
 The refresh rate isn't very fast, but it's about what I expect for a weather radar, which doesn't race by. The dithering process I used used a 2x2 Bayer Matrix, this taught me a lot about how the different threshold impact the image, and I spent significant time tweaking my matrix. However, I'm not completely satisfied with the resulting image. I expect I could use a larger matrix to convey more detail, while still producing a monochrome bitmap with good performance. In particular the names of cities are pretty hard to read, after the matrix chews up compression artifacts near the text.
 
 
-Roadmap: Future plans and updates.
-
-Acknowledgments: Credit contributors or inspirations.
+<h2>Future plans and updates</h2>
+The server actually offers way more than I use one the Inkplate right now. I have a bunch of sensor data, and the whole flow is sketched out in the high level design. But I have interviews coming up so I have to drop this project to go do leetcode.
