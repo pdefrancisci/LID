@@ -3,7 +3,7 @@
 <h2>Description</h2>
 The life improvement device, currently, is an e-paper project. It is Soldered's Inkplate 6, which acts as a frontend for NWS radar images preprocessed by a raspberry pi. Most of the work thus far has involved finding tricks to overcome the limitations of e-ink displays. So I will get into that next.
 
-<h2>[Inkplate 6](https://soldered.com/product/inkplate-6-6-e-paper-board/?attribute_pa_variant=with-e-paper)</h2>
+<h2>[Inkplate 6](https://soldered.com/product/inkplate-6-6-e-paper-board)</h2>
 The Inkplate 6 is a high end driver for e-paper displays. E-paper is a unique platform, it uses charged pigments to form an image, rather than brightness. As a result, the display is unique, and easy on the eyes, but also difficult to navigate, mainly due to it's high refresh rate, and limitation in color (the Inkplate 6 is black and white, offering greyscale in between).
 
 My goal in this project was to produce a home assistant, which is a common use case for e-paper hobby projects. What made my project different is I wanted the display to handle animation. Typically, image transitions on e-paper require what's called pixel inversion, the screen turns white, then black, then you see your image. This eliminates all lingering charges, and your image appears. However, this is *very* slow, full refreshes such as these can take over a second, even on high end displays like the Inkplate.
