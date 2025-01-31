@@ -24,6 +24,7 @@ To avoid this full refresh, I used a feature offered by some e-paper displays, k
 <p>This would load fast, with the one drawback that it looks terrible.</p>
 
 <p>Thankfully, the problem of giving the illusion of multiple colors, in an environment where there are few, is solved with a family of algorithms that do "dithering". Dithering describes the process of interweaving pixels, so that the pattern of weaved pixels gives the impression of a mix of the two colors. This process is commonly used in older computer games, as well as by comic books and cheap printers. I opted to use what's called a Bayer Matrix, which is used as a threshold map to produce ordered dithering. Essentially, rather than picking one threshold and applying it everywhere, you have a threshold matrix which is applied pixel by pixel. I chose to use a Bayer Matrix because the algorithm is fast, simple to implement, and *copes well with motion*. Algorithms such as Floyd Steinberg produce artifacts when movement takes place.</p>
+<img src="https://github.com/user-attachments/assets/d3fe2687-e6f5-4f16-a290-31aa24acc182">
 
 With the image reduced to a dithered monochrome bitmap, the Inkplate 6 can render the images, with a high refresh rate, but not an unbroken sense of continuity, as lengthy pixel inversion would require. Overall, I consider the project a success, and I'm just waiting for a case for the Inkplate to arrive now.
 
