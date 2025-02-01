@@ -2,7 +2,7 @@
 <h2><a href="https://youtu.be/YJxqMk4d9vA">Click here to see it in action!</a></h2>
 
 <h2>Description</h2>
-The life improvement device, currently, is an e-paper project. It is Soldered's Inkplate 6, which acts as a frontend for NWS radar images preprocessed by a raspberry pi. Most of the work thus far has involved finding tricks to overcome the limitations of e-ink displays. So I will get into that next.
+The life improvement device, currently, is an e-paper project. It is Soldered's Inkplate 6, which acts as a frontend for NWS radar images preprocessed by a raspberry pi. I take radar images from the the NWS station in Buffalo, New York, process them by applying ordered dithering, and transfer them via http to a display. Most of the work thus far has involved finding tricks to overcome the limitations of e-ink displays. So I will get into that next.
 
 <h2><a href="https://soldered.com/product/inkplate-6-6-e-paper-board">Inkplate 6</a></h2>
 The Inkplate 6 is a high end driver for e-paper displays. E-paper is a unique platform, it uses charged pigments to form an image, rather than brightness. As a result, the display is unique, and easy on the eyes, but also difficult to navigate, mainly due to it's high refresh rate, and limitation in color (the Inkplate 6 is black and white, offering greyscale in between).
