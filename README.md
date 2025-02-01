@@ -1,5 +1,5 @@
 <h1>Life Improvement Device</h1>
-<h2><a href="https://www.youtube.com/embed/oOnCfNCNFV8?si=gfAQq7jsOvnHzt7z">Click here to see it in action!</a></h2>
+<h2><a href="https://youtu.be/YJxqMk4d9vA">Click here to see it in action!</a></h2>
 
 <h2>Description</h2>
 The life improvement device, currently, is an e-paper project. It is Soldered's Inkplate 6, which acts as a frontend for NWS radar images preprocessed by a raspberry pi. Most of the work thus far has involved finding tricks to overcome the limitations of e-ink displays. So I will get into that next.
