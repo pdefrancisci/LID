@@ -6,4 +6,4 @@ for file in $(ls -tr ./dith); do
         ((counter++))
     fi
 done
-cp ./dith/* /media/pjd/6663-3139/ 
+cp ./dith/* /media/pjd/CDROM/ 

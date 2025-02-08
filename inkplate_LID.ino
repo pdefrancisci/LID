@@ -152,10 +152,10 @@ void setup()
 }
 
 // Function for drawing current time
-void drawTime(int i, NTPClient client)
+void drawTime(int i, NTPClient client, bool colon)
 {
     // Drawing current time
-    display.setTextColor(BLACK, WHITE);
+    display.setTextColor(WHITE);
     display.setTextSize(4);
     char currentTime[100];
     // snprintf(currentTime,sizeof(currentTime),"currentTime %i:%i",i);
@@ -174,7 +174,14 @@ void drawTime(int i, NTPClient client)
       hour=hour-12;
       ampm = "PM";
     }
-    snprintf(currentTime,sizeof(currentTime),"%02i:%02i %s",hour,min,ampm);
+    if(colon){
+      snprintf(currentTime,sizeof(currentTime),"%02i:%02i %s",hour,min,ampm);
+    }
+    else{
+      snprintf(currentTime,sizeof(currentTime),"%02i %02i %s",hour,min,ampm);
+    }
+    Serial.printf("drawing time: %s\n",currentTime);
+    display.fillRoundRect(450-(20*strlen(currentTime))-23, 550, 30*strlen(currentTime), 400, 40, BLACK);
     display.setCursor(450 - 20 * strlen(currentTime), 570);
     display.println(currentTime);
 }
@@ -190,8 +197,7 @@ bool isFileLargeEnough(const char *filename){
   Serial.printf("File: %s, Size: %d bytes\n",filename, filesize);
   return filesize >= MINIMUM_SIZE;
 }
-void loop()
-{
+void renderWeatherRadar(){
   timeClient.update();
   int lb = lo;
   if(hi-12>lo){
@@ -207,7 +213,7 @@ void loop()
           display.println("Image open error");
       }
     }
-    drawTime(i, timeClient);
+    drawTime(i, timeClient, true);
         
     display.partialUpdate();
   }
@@ -231,4 +237,58 @@ void loop()
     display.clearDisplay();
     display.display();
   }
+}
+void renderClockImage(){
+  HTTPClient http;
+  // Set parameters to speed up the download process.
+  http.getStream().setNoDelay(true);
+  http.getStream().setTimeout(1);
+
+  // Photo taken by: Roberto Fernandez
+  http.begin("http://syvvys:8008/randImage");
+
+  // Check response code.
+  int httpCode = http.GET();
+  if (httpCode == 200)
+  {
+      // Get the response length and make sure it is not 0.
+      int32_t len = http.getSize();
+      if (len > 0)
+      {
+          if (!display.drawBitmapFromWeb(http.getStreamPtr(), 0, 0, len))
+          {
+              // If is something failed (wrong filename or wrong bitmap format), write error message on the screen.
+              // REMEMBER! You can only use Windows Bitmap file with color depth of 1, 4, 8 or 24 bits with no
+              // compression!
+              display.println("Image open error");
+              display.display();
+          }
+          display.display();
+      }
+      else
+      {
+          display.println("Invalid response length");
+          display.display();
+      }
+  }
+  else
+  {
+      display.println("HTTP error");
+      display.display();
+  }
+  timeClient.update();
+  bool c = true;
+  for(int i=0; i<10; i++){
+    drawTime(hi, timeClient, c);
+    display.partialUpdate();
+    c=!c;
+    delay(250);
+  }
+  display.clearDisplay();
+  display.display();
+}
+void loop()
+{
+  renderWeatherRadar();
+  renderClockImage();
 }
