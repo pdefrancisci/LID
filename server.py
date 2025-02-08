@@ -9,10 +9,12 @@ from listener import get_record
 from pprint import pprint
 from PIL import Image
 import glob
+import random
 
 # Define the folder containing images
 IMAGE_FOLDER = '/home/pjd/LID/proc'
 DITH_FOLDER = '/home/pjd/LID/dith/'
+DITH_IMG_FOLDER = '/home/pjd/inkplate/dith_img/'
 PORT = 8008
 
 SERIAL_PORT = '/dev/ttyACM0'  # Adjust as needed
@@ -22,6 +24,15 @@ TIMEOUT = 2
 # Flask constructor takes the name of 
 # current module (__name__) as argument.
 app = Flask(__name__)
+
+@app.route('/randImage')
+def randImage():
+    image_files = glob.glob(os.path.join(DITH_IMG_FOLDER,"*.bmp"))
+    print(DITH_IMG_FOLDER)
+    print(os.path.exists(DITH_IMG_FOLDER))
+    print(image_files)
+    image = random.choice(image_files)
+    return send_file(image, mimetype='image/bmp')
 
 # The route() function of the Flask class is a decorator, 
 # which tells the application which URL should call 
