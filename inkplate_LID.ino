@@ -178,7 +178,18 @@ void drawTime(int i, NTPClient client)
     display.setCursor(450 - 20 * strlen(currentTime), 570);
     display.println(currentTime);
 }
+const int MINIMUM_SIZE = 56000;
+bool isFileLargeEnough(const char *filename){
+  if(!file.open(filename, O_RDONLY)){
+    Serial.println("File does not exist");
+    return false;
+  }
+  int filesize = file.fileSize();
+  file.close();
 
+  Serial.printf("File: %s, Size: %d bytes\n",filename, filesize);
+  return filesize >= MINIMUM_SIZE;
+}
 void loop()
 {
   timeClient.update();
@@ -190,9 +201,11 @@ void loop()
   for(int i=lb; i<=hi; i++){
     char fname[20];
     snprintf(fname, sizeof(fname),"image%d.bmp",i);
-    if (!display.drawImage(fname, 0, 0, 0))
-    {
-        display.println("Image open error");
+    if(isFileLargeEnough(fname)){
+      if (!display.drawImage(fname, 0, 0, 0))
+      {
+          display.println("Image open error");
+      }
     }
     drawTime(i, timeClient);
         
