@@ -310,6 +310,8 @@ int cloud = 0;
 int visibility = 0;
 int sunrise = 0;
 int sunset = 0;
+int spacing = ((WIDTH/3)-250)/2;
+
 void fetchWeatherData(){
   char weatherURL[128];
   snprintf(weatherURL,sizeof(weatherURL),formatURL,city,openWeatherMapAPIKey);
@@ -338,8 +340,6 @@ void renderHomeAssistant(){
   display.partialUpdate();
   delay(100);
   display.drawLine(WIDTH/3, 0, WIDTH/3, HEIGHT, BLACK);
-  display.partialUpdate();
-  delay(100);
   display.drawLine((WIDTH/3)*2, 0, (WIDTH/3)*2, HEIGHT, BLACK);
   display.partialUpdate();
   delay(100);
@@ -356,6 +356,8 @@ void renderHomeAssistant(){
   display.setCursor((WIDTH/3)+10, 9*8);
   display.println(city);
   display.partialUpdate();
+  display.drawImage("rochester.png", (WIDTH/3)+spacing, HEIGHT/2-122);
+  display.partialUpdate();
   delay(100);
   //I only get 1,000 openWeatherMap calls a day.  
   //That's 41 an hour, one every five minutes, one every five fits
@@ -364,10 +366,34 @@ void renderHomeAssistant(){
     lastOpenWeatherMapCall = millis();
   }
   display.setCursor(0+10, 1*8);
-  display.printf("Temp:\n%02f f",temp);
+  display.printf("Temp:%d f",int(temp));
+  char* file;
+  int width;
+  if(temp<45){
+    file="cold.png";
+    width=250;
+  }
+  else if(temp<75){
+    file="temp.png";
+    width=157;
+  } else{
+    file="hot.png";
+    width=255;
+  }
+  int spac = ((WIDTH/3)-width)/2;
+  display.drawImage(file, spac, HEIGHT/2-250);
   display.partialUpdate();
   display.setCursor(0+8, HEIGHT/2+8);
   display.printf("Humidity:");
+  //depending on the humidity, render more droplets
+  int x_min = 0;
+  int x_max = (WIDTH/3)-16;
+  int y_min = (HEIGHT/2)+8;
+  int y_max = 600-8;
+  for(int i=0; i<humidity/5; i++){
+    display.drawImage("droplet.png",random(x_min,x_max),random(y_min,y_max));
+    display.partialUpdate();
+  }
   display.setCursor(0+8, HEIGHT/2+5*8);
   display.printf("%i",humidity);
   display.partialUpdate();
@@ -376,6 +402,27 @@ void renderHomeAssistant(){
   display.setCursor((WIDTH/3)+8, HEIGHT/2+5*8);
   display.printf("%i",cloud);
   display.partialUpdate();
+  file;
+  width;
+  int height;
+  if(cloud<33){
+    file="sunny.png";
+    width=250;
+    height=246;
+  }
+  else if(cloud<66){
+    file="partly.png";
+    width=250;
+    height=250;
+  } else{
+    file="cloud.png";
+    width=250;
+    height=159;
+  }
+  spac = ((WIDTH/3)-width)/2;
+  // int vspac = ((HEIGHT/2)-height)/2;
+  display.drawImage(file, (WIDTH/3)+spac, HEIGHT/2+9*8);
+  display.partialUpdate();
   display.setCursor((WIDTH/3)*2+8, HEIGHT/2+8);
   display.printf("Visibility:");
   display.setCursor((WIDTH/3)*2+8, HEIGHT/2+5*8);
@@ -383,20 +430,30 @@ void renderHomeAssistant(){
   display.partialUpdate();
   display.setCursor((WIDTH/3)*2+8, 0+8);
   timeClient.update();
+  int hour;
+  int minute;
+  const char* ampm = "am";
+  struct tm timeinfo;
   if(timeClient.getEpochTime()<sunrise){
-    struct tm timeinfo;
     gmtime_r((time_t*)&sunrise, &timeinfo);
-    display.printf("Sunrise:",timeinfo.tm_hour,timeinfo.tm_min);
-    display.setCursor((WIDTH/3)*2+8, 0+8*5);
-    display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
+    display.printf("Sunrise:");
+    // display.setCursor((WIDTH/3)*2+8, 0+8*5);
+    // display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
   }
   else{
-    struct tm timeinfo;
     gmtime_r((time_t*)&sunset, &timeinfo);
-    display.printf("Sunset:",timeinfo.tm_hour,timeinfo.tm_min);
-    display.setCursor((WIDTH/3)*2+8, 0+8*5);
-    display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
+    display.printf("Sunset:");
+    // display.setCursor((WIDTH/3)*2+8, 0+8*5);
+    // display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
   }
+  hour = timeinfo.tm_hour+TIMEZONE;
+  if(hour>12){
+    hour=hour-12;
+    ampm = "pm";
+  }
+  minute = timeinfo.tm_min;
+  display.setCursor((WIDTH/3)*2+8, 0+8*5);
+  display.printf("%i:%i %s",hour,minute,ampm);
   display.partialUpdate();
   delay(3000);
 }
@@ -414,6 +471,4 @@ void loop()
 
   //renderForecast();
   //renderBumper();
-  //renderPrecipitation();
-  //renderHumidity();
 }
