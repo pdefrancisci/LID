@@ -18,6 +18,9 @@ for file in input_dir.iterdir():
 	if file.suffix.lower() in [".png", ".jpg", ".jpeg", ".bmp"]:
 		with Image.open(file) as img:
 			dith_img = img.convert("1",dither=Image.FLOYDSTEINBERG)
+			ratio = dith_img.height / dith_img.width
+			new_height = int(ratio*dith_img.width)
+			dith_img = dith_img.resize((800,new_height), Image.LANCZOS)
 			dith_img = dith_img.crop((0,0,800,600))
 			output_path = output_dir / f"{file.stem}.bmp"
 			dith_img.save(output_path, format="BMP")
