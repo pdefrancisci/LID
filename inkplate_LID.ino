@@ -4,6 +4,7 @@
 #include <HTTPClient.h>
 #include <time.h>
 #include <SdFat.h>
+#include <ArduinoJson.h>
 #define NAME_SIZE 20
 
 // Next 3 lines are a precaution, you can ignore those, and the example would also work without them
@@ -34,6 +35,7 @@ const char* imageURL="http://syvvys:8008/dither/radarImage";
 int lo;
 int hi;
 int lastRead;
+int lastOpenWeatherMapCall;
 time_t now;
 
 bool downloadNewRadarImage(){
@@ -110,7 +112,8 @@ void setup()
     lo=1;
     hi=10;
     time(&now);
-    lastRead = millis();
+    lastRead = millis()-5*60*1000;
+    lastOpenWeatherMapCall = millis()-5*60*1000;
     Serial.begin(9600);
     WiFi.begin(ssid,password);
     timeClient.begin();
@@ -180,7 +183,7 @@ void drawTime(int i, NTPClient client, bool colon)
     else{
       snprintf(currentTime,sizeof(currentTime),"%02i %02i %s",hour,min,ampm);
     }
-    Serial.printf("drawing time: %s\n",currentTime);
+    // Serial.printf("drawing time: %s\n",currentTime);
     display.fillRoundRect(450-(20*strlen(currentTime))-23, 550, 30*strlen(currentTime), 400, 40, BLACK);
     display.setCursor(450 - 20 * strlen(currentTime), 570);
     display.println(currentTime);
@@ -287,8 +290,130 @@ void renderClockImage(){
   display.clearDisplay();
   display.display();
 }
+/*
+todo:
+2 rows 3 columns
+center says "Indoor conditions"
+time (already kind of done but needs to dynamically move)
+aqi
+humidity
+pressure
+temp
+*/
+//don't use this!!!
+const char* openWeatherMapAPIKey = "3ab5c5c6f7bf91345d02ce33bb926195";
+const char* city = "rochester";
+const char* formatURL = "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=imperial";
+float temp = 0;
+int humidity = 0;
+int cloud = 0;
+int visibility = 0;
+int sunrise = 0;
+int sunset = 0;
+void fetchWeatherData(){
+  char weatherURL[128];
+  snprintf(weatherURL,sizeof(weatherURL),formatURL,city,openWeatherMapAPIKey);
+  // HTTPClient http;
+  http.begin(weatherURL);
+  int httpCode = http.GET();
+  if (httpCode > 0) {
+      String payload = http.getString();
+      StaticJsonDocument<512> doc;
+      deserializeJson(doc, payload);
+      temp = doc["main"]["temp"];
+      Serial.printf("temp=%i\n",temp);
+      humidity = doc["main"]["humidity"];
+      cloud = doc["clouds"]["all"];
+      visibility = doc["visibility"];
+      sunrise = doc["sys"]["sunrise"];
+      sunset = doc["sys"]["sunset"];
+      http.end();
+  } else {
+      Serial.println("Failed to connect");
+      http.end();
+  }
+}
+void renderHomeAssistant(){
+  display.drawLine(0, HEIGHT/2, WIDTH, HEIGHT/2, BLACK);
+  display.partialUpdate();
+  delay(100);
+  display.drawLine(WIDTH/3, 0, WIDTH/3, HEIGHT, BLACK);
+  display.partialUpdate();
+  delay(100);
+  display.drawLine((WIDTH/3)*2, 0, (WIDTH/3)*2, HEIGHT, BLACK);
+  display.partialUpdate();
+  delay(100);
+  char* outdoor = "outdoor";
+  char* conditions = "conditions";
+  display.setTextColor(BLACK);
+  display.setTextSize(4);
+  display.setCursor((WIDTH/3)+10, 8);
+  display.println(outdoor);
+  display.partialUpdate();
+  display.setCursor((WIDTH/3)+10, 5*8);
+  display.println(conditions);
+  display.partialUpdate();
+  display.setCursor((WIDTH/3)+10, 9*8);
+  display.println(city);
+  display.partialUpdate();
+  delay(100);
+  //I only get 1,000 openWeatherMap calls a day.  
+  //That's 41 an hour, one every five minutes, one every five fits
+  if(millis()-lastOpenWeatherMapCall>=5*60*1000){
+    fetchWeatherData();
+    lastOpenWeatherMapCall = millis();
+  }
+  display.setCursor(0+10, 1*8);
+  display.printf("Temp:\n%02f f",temp);
+  display.partialUpdate();
+  display.setCursor(0+8, HEIGHT/2+8);
+  display.printf("Humidity:");
+  display.setCursor(0+8, HEIGHT/2+5*8);
+  display.printf("%i",humidity);
+  display.partialUpdate();
+  display.setCursor((WIDTH/3)+8, HEIGHT/2+8);
+  display.printf("Cloud:",cloud);
+  display.setCursor((WIDTH/3)+8, HEIGHT/2+5*8);
+  display.printf("%i",cloud);
+  display.partialUpdate();
+  display.setCursor((WIDTH/3)*2+8, HEIGHT/2+8);
+  display.printf("Visibility:");
+  display.setCursor((WIDTH/3)*2+8, HEIGHT/2+5*8);
+  display.printf("%i",visibility);
+  display.partialUpdate();
+  display.setCursor((WIDTH/3)*2+8, 0+8);
+  timeClient.update();
+  if(timeClient.getEpochTime()<sunrise){
+    struct tm timeinfo;
+    gmtime_r((time_t*)&sunrise, &timeinfo);
+    display.printf("Sunrise:",timeinfo.tm_hour,timeinfo.tm_min);
+    display.setCursor((WIDTH/3)*2+8, 0+8*5);
+    display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
+  }
+  else{
+    struct tm timeinfo;
+    gmtime_r((time_t*)&sunset, &timeinfo);
+    display.printf("Sunset:",timeinfo.tm_hour,timeinfo.tm_min);
+    display.setCursor((WIDTH/3)*2+8, 0+8*5);
+    display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
+  }
+  display.partialUpdate();
+  delay(3000);
+}
 void loop()
 {
+  Serial.println("weather radar...");
   renderWeatherRadar();
+  Serial.println("clock...");
   renderClockImage();
+  Serial.println("home assistant...");
+  renderHomeAssistant();
+  Serial.println("end");
+  Serial.print("Free heap: ");
+  Serial.println(ESP.getFreeHeap());
+
+  //renderForecast();
+  //renderBumper();
+  //renderPrecipitation();
+  //renderHumidity();
 }
