@@ -456,16 +456,68 @@ void renderHomeAssistant(){
   display.printf("%i:%i %s",hour,minute,ampm);
   display.partialUpdate();
   delay(3000);
+  display.clearDisplay();
+  display.display();
+}
+void renderSuntimes(){
+  display.setTextColor(BLACK);
+  display.setTextSize(4);
+  timeClient.update();
+  drawTime(hi,timeClient, true);
+  //draw a nice looking arc to render on
+  display.drawCircle(WIDTH/2, WIDTH+200, WIDTH, BLACK);
+  
+  Serial.printf("Sunrise=%i",sunrise);
+  Serial.printf("Sunset=%i",sunset);
+  /*
+  if it is before sunrise, get total time between sunrise and sunset
+  then, take the difference between now and sunset
+  then, we want the moon to be at WIDTH*((now-sunset)/(sunrise-sunset))
+  */
+  struct tm timeinfo;
+  int total;
+  int howLong;
+  bool nightTime = false;
+  if(timeClient.getEpochTime()<sunrise){
+    //if the sun has already set, openweathermap will move the sunset forward
+    //so, estimate when the sunset was by taking the next sunset, and subtracting a day
+    total = sunrise - (sunset-(24*60*60));
+    howLong = timeClient.getEpochTime()-(sunset-(24*60*60));
+    nightTime=true;
+  }
+  /*
+  if it is after sunrise, get total time between
+  as well as diff between now and sunrise
+  WIDTH*(how long its been / how long in total) to get the x component
+  */
+  else{
+    total = sunset - (sunrise-(24*60*60));
+    howLong = timeClient.getEpochTime()-(sunrise-(24*60*60));
+  }
+  int x = (int)(WIDTH*((float)howLong/(float)total));
+  Serial.printf("howLong=%i total=%i\n",howLong,total);
+  //just the bottom arc of the circle, the display starts at 0,0
+  //in the left hand corner
+  int y = 1000-sqrt(640000-(x-WIDTH/2)^2);
+  Serial.printf("ratio=%i y=%i");
+  Serial.printf("x=%i y=%i\n",x,y);
+  if(nightTime){
+    display.fillCircle(x, y, 50, BLACK);
+  }
+  else{
+    display.drawCircle(x, y, 50, BLACK);
+  }
+  //TODO: add the time display, but I can't possibly be bothered right now
+  display.display();
+  delay(5000);
 }
 void loop()
 {
-  Serial.println("weather radar...");
-  renderWeatherRadar();
-  Serial.println("clock...");
+  // renderWeatherRadar();
   renderClockImage();
-  Serial.println("home assistant...");
   renderHomeAssistant();
-  Serial.println("end");
+  renderSuntimes();
+
   Serial.print("Free heap: ");
   Serial.println(ESP.getFreeHeap());
 
