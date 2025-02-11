@@ -109,6 +109,7 @@ bool downloadNewRadarImage(){
 
 void setup()
 {
+    Serial.println("setup()");
     lo=1;
     hi=10;
     time(&now);
@@ -434,17 +435,13 @@ void renderHomeAssistant(){
   int minute;
   const char* ampm = "am";
   struct tm timeinfo;
-  if(timeClient.getEpochTime()<sunrise){
+  if(timeClient.getEpochTime()<sunrise||timeClient.getEpochTime()>sunset){
     gmtime_r((time_t*)&sunrise, &timeinfo);
     display.printf("Sunrise:");
-    // display.setCursor((WIDTH/3)*2+8, 0+8*5);
-    // display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
   }
   else{
     gmtime_r((time_t*)&sunset, &timeinfo);
     display.printf("Sunset:");
-    // display.setCursor((WIDTH/3)*2+8, 0+8*5);
-    // display.printf("%i:%i",timeinfo.tm_hour,timeinfo.tm_min);
   }
   hour = timeinfo.tm_hour+TIMEZONE;
   if(hour>12){
@@ -462,10 +459,7 @@ void renderHomeAssistant(){
 void renderSuntimes(){
   display.setTextColor(BLACK);
   display.setTextSize(4);
-  timeClient.update();
-  drawTime(hi,timeClient, true);
   //draw a nice looking arc to render on
-  display.drawCircle(WIDTH/2, WIDTH+200, WIDTH, BLACK);
   
   Serial.printf("Sunrise=%i",sunrise);
   Serial.printf("Sunset=%i",sunset);
@@ -481,8 +475,15 @@ void renderSuntimes(){
   if(timeClient.getEpochTime()<sunrise){
     //if the sun has already set, openweathermap will move the sunset forward
     //so, estimate when the sunset was by taking the next sunset, and subtracting a day
+    Serial.println("\nSun not up yet...");
     total = sunrise - (sunset-(24*60*60));
     howLong = timeClient.getEpochTime()-(sunset-(24*60*60));
+    nightTime=true;
+  }
+  else if(timeClient.getEpochTime()>sunset){
+    Serial.println("\nSun gone down...");
+    total = (sunrise+(24*60*60)) - sunset;
+    howLong = timeClient.getEpochTime()-sunset;
     nightTime=true;
   }
   /*
@@ -491,29 +492,41 @@ void renderSuntimes(){
   WIDTH*(how long its been / how long in total) to get the x component
   */
   else{
-    total = sunset - (sunrise-(24*60*60));
-    howLong = timeClient.getEpochTime()-(sunrise-(24*60*60));
+    Serial.println("\nSun going down...");
+    total = sunset - sunrise;
+    howLong = timeClient.getEpochTime()-sunrise;
   }
   int x = (int)(WIDTH*((float)howLong/(float)total));
   Serial.printf("howLong=%i total=%i\n",howLong,total);
   //just the bottom arc of the circle, the display starts at 0,0
   //in the left hand corner
-  int y = 1000-sqrt(640000-(x-WIDTH/2)^2);
+  int y = 975-sqrt(640000-(x-WIDTH/2)^2);
   Serial.printf("ratio=%i y=%i");
   Serial.printf("x=%i y=%i\n",x,y);
   if(nightTime){
     display.fillCircle(x, y, 50, BLACK);
+    display.drawCircle(WIDTH/2, WIDTH+225, WIDTH, BLACK);
   }
   else{
     display.drawCircle(x, y, 50, BLACK);
+    display.fillCircle(WIDTH/2, WIDTH+225, WIDTH, BLACK);
   }
-  //TODO: add the time display, but I can't possibly be bothered right now
   display.display();
-  delay(5000);
+  timeClient.update();
+  bool c = true;
+  for(int i=0; i<10; i++){
+    drawTime(hi, timeClient, c);
+    display.partialUpdate();
+    c=!c;
+    delay(250);
+  }
+  // delay(5000);
+  display.clearDisplay();
+  display.display();
 }
 void loop()
 {
-  // renderWeatherRadar();
+  renderWeatherRadar();
   renderClockImage();
   renderHomeAssistant();
   renderSuntimes();
