@@ -500,16 +500,18 @@ void renderSuntimes(){
   Serial.printf("howLong=%i total=%i\n",howLong,total);
   //just the bottom arc of the circle, the display starts at 0,0
   //in the left hand corner
-  int y = 975-sqrt(640000-(x-WIDTH/2)^2);
+  int y = 875-sqrt(640000-(x-WIDTH/2)^2);
   Serial.printf("ratio=%i y=%i");
   Serial.printf("x=%i y=%i\n",x,y);
   if(nightTime){
-    display.fillCircle(x, y, 50, BLACK);
-    display.drawCircle(WIDTH/2, WIDTH+225, WIDTH, BLACK);
+    display.fillScreen(BLACK);
+    display.fillCircle(x, y, 50, WHITE);
+    display.drawCircle(WIDTH/2, WIDTH+225, WIDTH, WHITE);
   }
   else{
-    display.drawCircle(x, y, 50, BLACK);
-    display.fillCircle(WIDTH/2, WIDTH+225, WIDTH, BLACK);
+    display.fillScreen(WHITE);
+    display.fillCircle(x, y, 50, BLACK);
+    display.drawCircle(WIDTH/2, WIDTH+225, WIDTH, BLACK);
   }
   display.display();
   timeClient.update();
@@ -520,7 +522,6 @@ void renderSuntimes(){
     c=!c;
     delay(250);
   }
-  // delay(5000);
   display.clearDisplay();
   display.display();
 }
