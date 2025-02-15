@@ -15,7 +15,7 @@
 #include "Inkplate.h"            // Include Inkplate library to the sketch
 Inkplate display(INKPLATE_1BIT); // Create an object on Inkplate library and also set library into 3 Bit mode
 SdFile file;                     // Create SdFile object used for accessing files on SD card
-HTTPClient http;
+// HTTPClient http;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 0, 60000);
 
@@ -57,7 +57,7 @@ bool downloadNewRadarImage(){
       if (len > 0)
       {
           if (display.sdCardInit()){
-            SdFile file;
+            // SdFile file;
             static char name[NAME_SIZE];
             hi++;
             //untested!
@@ -76,16 +76,19 @@ bool downloadNewRadarImage(){
                     Serial.printf("Bytes read=%i\n",bytesRead);
                     file.write(buffer, bytesRead); // Write to internal flash
                 }
+                Serial.println("wrote the file???");
                 file.flush();
                 file.close(); // Close the file after writing
                 http.end();
-                Serial.println("wrote the file???");
                 return true;
                 // display.partialUpdate();
             }
             else
             {
                 Serial.println("File write failed!");
+                file.close();
+                http.end();
+                return false;
             }
             Serial.println("out of the problem area...");
           }
@@ -93,22 +96,21 @@ bool downloadNewRadarImage(){
       else
       {
           Serial.println("Invalid response length");
-          http.end();
-          return false;
       }
   }
   else
   {
       Serial.println("HTTP error");
-      http.end();
-      return false;
   }
+  Serial.println("Outer block...");
   http.end();
   return false;
 }
 
 void setup()
 {
+
+  // ESP.wdtEnable(WDTO_8S);
     Serial.println("setup()");
     lo=1;
     hi=10;
@@ -193,6 +195,7 @@ const int MINIMUM_SIZE = 56000;
 bool isFileLargeEnough(const char *filename){
   if(!file.open(filename, O_RDONLY)){
     Serial.println("File does not exist");
+    file.close();
     return false;
   }
   int filesize = file.fileSize();
@@ -280,6 +283,7 @@ void renderClockImage(){
       display.println("HTTP error");
       display.display();
   }
+  http.end();
   timeClient.update();
   bool c = true;
   for(int i=0; i<10; i++){
@@ -316,7 +320,7 @@ int spacing = ((WIDTH/3)-250)/2;
 void fetchWeatherData(){
   char weatherURL[128];
   snprintf(weatherURL,sizeof(weatherURL),formatURL,city,openWeatherMapAPIKey);
-  // HTTPClient http;
+  HTTPClient http;
   http.begin(weatherURL);
   int httpCode = http.GET();
   if (httpCode > 0) {
@@ -330,11 +334,10 @@ void fetchWeatherData(){
       visibility = doc["visibility"];
       sunrise = doc["sys"]["sunrise"];
       sunset = doc["sys"]["sunset"];
-      http.end();
   } else {
       Serial.println("Failed to connect");
-      http.end();
   }
+  http.end();
 }
 void renderHomeAssistant(){
   display.drawLine(0, HEIGHT/2, WIDTH, HEIGHT/2, BLACK);
@@ -368,21 +371,21 @@ void renderHomeAssistant(){
   }
   display.setCursor(0+10, 1*8);
   display.printf("Temp:%d f",int(temp));
-  char* file;
+  char* imfile;
   int width;
   if(temp<45){
-    file="cold.png";
+    imfile="cold.png";
     width=250;
   }
   else if(temp<75){
-    file="temp.png";
+    imfile="temp.png";
     width=157;
   } else{
-    file="hot.png";
+    imfile="hot.png";
     width=255;
   }
   int spac = ((WIDTH/3)-width)/2;
-  display.drawImage(file, spac, HEIGHT/2-250);
+  display.drawImage(imfile, spac, HEIGHT/2-250);
   display.partialUpdate();
   display.setCursor(0+8, HEIGHT/2+8);
   display.printf("Humidity:");
@@ -403,26 +406,25 @@ void renderHomeAssistant(){
   display.setCursor((WIDTH/3)+8, HEIGHT/2+5*8);
   display.printf("%i",cloud);
   display.partialUpdate();
-  file;
   width;
   int height;
   if(cloud<33){
-    file="sunny.png";
+    imfile="sunny.png";
     width=250;
     height=246;
   }
   else if(cloud<66){
-    file="partly.png";
+    imfile="partly.png";
     width=250;
     height=250;
   } else{
-    file="cloud.png";
+    imfile="cloud.png";
     width=250;
     height=159;
   }
   spac = ((WIDTH/3)-width)/2;
   // int vspac = ((HEIGHT/2)-height)/2;
-  display.drawImage(file, (WIDTH/3)+spac, HEIGHT/2+9*8);
+  display.drawImage(imfile, (WIDTH/3)+spac, HEIGHT/2+9*8);
   display.partialUpdate();
   display.setCursor((WIDTH/3)*2+8, HEIGHT/2+8);
   display.printf("Visibility:");
@@ -534,6 +536,7 @@ void loop()
 
   Serial.print("Free heap: ");
   Serial.println(ESP.getFreeHeap());
+  // wdt_reset();
 
   //renderForecast();
   //renderBumper();
